@@ -6,8 +6,9 @@ const { Sequelize } = require('sequelize');
 const dotenv = require("dotenv").config();
 const env = require('../env');
 
+// for xamp http://192.168.64.2/
 const db = new Sequelize(env.db_name, env.db_username, env.db_password, {
-    host: '192.168.64.2',
+    host: '127.0.0.1',
     pool: {
         max: 5,
         min: 0,
@@ -17,6 +18,7 @@ const db = new Sequelize(env.db_name, env.db_username, env.db_password, {
     dialect: 'mysql',
     // operatorsAliases: false
 });
+
 
 // for remote sequelize connection
 // const db = new Sequelize(process.env.CLEARDB_DATABASE_URL, {
