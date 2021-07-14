@@ -1,26 +1,40 @@
 const express = require('express');
 const { add, getUsers, deleteTable, createTable, getUserQueryData, getUser,
     deleteRecord, updateRecord, getSearchUser,
-    getSameRecDates } = require('../controllers/users');
+    getSameRecDates, login, extendToken } = require('../controllers/users');
+const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-router.post('/', add)
-    .get('/', getUsers);
+
+
+router
+    .get('/search/:firstName', getSearchUser);
+
+
+router
+    .post('/search', getSameRecDates);
 
 router.post('/table', createTable)
     .delete('/table', deleteTable);
+
+router
+    .route('/login')
+    .post(login);
+
+router
+    .get('/extendtoken', auth, extendToken);
+
 
 router
     .get('/:id', getUser)
     .put('/:id', updateRecord)
     .delete('/:id', deleteRecord);
 
-router
-    .get('/search/:term', getSearchUser);
+router.post('/', add)
+    .get('/', getUsers);
 
-router
-    .post('/search', getSameRecDates);
+
 
 
 module.exports = router;

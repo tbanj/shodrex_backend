@@ -19,12 +19,12 @@ const User = db.define('User', {
     password: {
         type: Sequelize.DataTypes.STRING,
         allowNull: false,
-        validate: {
-            is: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,20}$/i,
-            notNull: true,
-            notEmpty: true,
-            max: 20
-        }
+        // validate: {
+        //     is: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,20}$/i,
+        //     notNull: true,
+        //     notEmpty: true,
+        //     max: 20
+        // }
     },
     email: {
         type: Sequelize.DataTypes.STRING,

@@ -3,69 +3,53 @@ const { db } = require('../config/database');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const Survey = require('../models/survey');
+const Helper = require('../libs/helper');
+const ValidateData = require('../libs/validateData');
+const SurveySchema = require('../validators/survey');
 
 const getSearchSurvey = (req, res) => {
-    console.log('term', req.query);
-    let { term } = req.query;
-    // term = term.toUpperCase();
-    Survey.findAll({ where: { technologies: { [Op.like]: '%' + term + '%' } } })
-        .then((surveys) => res.status(200).json({ data: surveys }))
+    Survey.findAll({ where: { ownPhone: { [Op.like]: '%' + req.query.ownPhone + '%' } } })
+        .then((surveys) => res.status(200).send({ data: surveys }))
         .catch(err => {
             console.log('Error', err);
-            res.status(500).json({ Error: { message: err } });
+            res.status(500).send({ Error: { message: err } });
         })
 }
 
 const getSurveys = (req, res) => Survey.findAll()
     .then(surveys => {
         // console.log('surveys', surveys);
-        res.status(200).json({ data: surveys });
+        res.status(200).send({ data: surveys });
     })
     .catch((err) => {
         console.log('Error: ', err);
-        res.status(500).json({ Error: { message: err } });
+        res.status(500).send({ Error: { message: err } });
     });
 
 //    Add survey
 const addSurvey = async (req, res) => {
-    console.log('detail inputted', req.body);
-    // const data = {
-    //     ownPhone: 'Simple',/
-    //     email: 'user2@gmail.com',
-    // }
+    try {
+        console.warn('req.body', req.body);
+        const validation = ValidateData(SurveySchema, { ...req.body, createdAt: new Date().toISOString() });
+        if (validation.error) {
+            res.status(400).send({ error: { message: validation.error.message } });
+            return;
+        };
 
-    let { title, technologies, budget, description, contactEmail } = req.body;
-    let errors = [];
-    if (!title) {
-        errors.push({ text: 'Please add a title' })
-    }
-    if (!description) {
-        errors.push({ text: 'Please add a description' })
-    }
-    if (!technologies) {
-        errors.push({ text: 'Please add a technology' })
-    }
-    if (!contactEmail) {
-        errors.push({ text: 'Please add a contact email' })
-    }
+        const [result, metadata] = await Survey.sequelize.query(`SELECT * FROM shodrex_survey.Surveys
+        WHERE email = '${req.body.email}' `);
 
-    if (errors.length > 0) {
-        res.status(400).json({ error: errors })
-    } else {
-        if (!budget) {
-            budget = 'Unknown';
-        } else { budget = `$${budget}`; }
+        if (result.length > 0) {
+            res.status(401).send({ error: { message: 'you have already filled the survey form' } });
+            return;
+        };
 
-        // Make lowercase and remove space after comma
-        technologies = technologies.toLowerCase().replace(/, /g, ',');
+        const survey = await Survey.create(validation.value)
+        res.status(201).send({ error: { data: survey } });
 
-        // Insert into table
-        await Survey.create({ title, technologies, budget, description, contactEmail })
-            .then((survey) => res.status(201).json({ data: survey }))
-            .catch(err => {
-                console.log('Error: ', err)
-                res.status(500).json({ Error: { message: err } })
-            });
+    } catch (err) {
+        console.error('error', err);
+        res.status(500).send({ Error: { message: err } });
     }
 };
 
@@ -73,20 +57,20 @@ const addSurvey = async (req, res) => {
 const deleteTable = async (req, res) => {
     try {
         await Firm.drop();
-        res.status(200).json({ data: { message: 'Firm table deleted successfully' } });
+        res.status(200).send({ data: { message: 'Survey table deleted successfully' } });
     } catch (error) {
-        console.log('Unable to delete Firm Table', err);
-        res.status(500).json({ error: { message: err } });
+        console.log('Unable to delete Survey Table', err);
+        res.status(500).send({ error: { message: err } });
     }
 };
 
 const createTable = async (req, res) => {
     try {
         await Firm.sync();
-        res.status(201).json({ data: { message: 'Survey table created' } });
+        res.status(201).send({ data: { message: 'Survey table created' } });
     } catch (error) {
         console.log('Unable to create Survey Table', err);
-        res.status(500).json({ error: { message: err } });
+        res.status(500).send({ error: { message: err } });
     }
 };
 

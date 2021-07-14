@@ -1,6 +1,7 @@
 const express = require("express");
 const { db } = require('./config/database');
 const Sequelize = require('sequelize');
+const cors = require('cors');
 const dotenv = require("dotenv").config();
 const bodyParser = require("body-parser");
 const path = require("path");
@@ -13,6 +14,7 @@ db.authenticate()
     .catch((err) => console.log('Error: ', err));
 
 const app = express();
+app.use(cors({ origin: '*', optionsSuccessStatus: 200, exposedHeaders: ['authorization'] }));
 
 //  body parser
 app.use(bodyParser.urlencoded({ extended: false }));

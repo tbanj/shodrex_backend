@@ -1,5 +1,6 @@
 const express = require('express');
 const { getSurveys, addSurvey, getSearchSurvey } = require('../controllers/survey');
+const auth = require('../middleware/auth');
 
 const router = express.Router();
 
